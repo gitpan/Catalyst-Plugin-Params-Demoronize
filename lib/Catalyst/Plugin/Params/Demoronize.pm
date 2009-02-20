@@ -2,10 +2,20 @@ package Catalyst::Plugin::Params::Demoronize;
 
 use strict;
 use warnings;
+use utf8;
 
 =head1 NAME
 
 Catalyst::Plugin::Params::Demoronize - convert common UTF-8 and Windows-1252 characters to their ASCII equivalents
+
+=head1 SYNOPSIS
+
+  # Be sure and use the Unicode plugin if you want to handle Unicode
+  # replacement.
+  use Catalyst qw(Unicode Demoronize);
+
+  # Optionally enable replacement of common unicode "smart" characters.
+  MyApp->config->{demoronize} = { replace_unicode => 1 }
 
 =head1 DESCRIPTION
 
@@ -73,18 +83,38 @@ converted to UTF-8 by the browser.  this plugin will replace
 both the unicode characters AND the Windows-1252 characters
 with sane ASCII equivalents.
 
+=head1 UNICODE
+
+Demoronize assumes that you are using L<Catalyst::Plugin::Unicode>
+to convert incoming parameters into Unicode characters.  If you are
+not and enable optional C<replace_unicode>, you may have issues.
+
+=head1 CONFIG
+
+=head2 replace_unicode
+
+If this flag is enabled (it is off by default) then commonly substituted
+Unicode characters will be converted to their ASCII equivalents.
+
+=head2 replace_map
+
+A map of Unicode characters and their ASCII equivalents that will be swapped.
+This can be overridden, but defaults to:
+
 =cut
 
 use NEXT;
 use Encode::ZapCP1252;
 
-our $VERSION = '1.0';
+our $VERSION = '1.1';
 
 =head1 METHODS
 
 =over 4
 
-=item add_to_menu
+=item prepare_parameters
+
+Converts parameters.
 
 =cut
 
@@ -112,22 +142,30 @@ sub _demoronize
 
 	zap_cp1252($str);
 
-	$str =~ s/\xE2\x80\x9A/,/g;		# 82
-	$str =~ s/\xE2\x80\x9E/,,/g;	# 84
-	$str =~ s/\xE2\x80\xA6/.../g;	# 85
+    my $config = $c->config->{'demoronize'} ||= {};
 
-	$str =~ s/\xCB\x86/^/g;			# 88
+    $config->{replace_map} = {
+        '‚' => ',',     # 82, SINGLE LOW-9 QUOTATION MARK
+        '„' => ',,',    # 84, DOUBLE LOW-9 QUOTATION MARK
+        '…' => '...',   # 85, HORIZONTAL ELLIPSIS
+        'ˆ' => '^',     # 88, MODIFIER LETTER CIRCUMFLEX ACCENT
+        '‘' => '`',     # 91, LEFT SINGLE QUOTATION MARK
+        '’' => "'",     # 92, RIGHT SINGLE QUOTATION MARK
+        '“' => '"',     # 93, LEFT DOUBLE QUOTATION MARK
+        '”' => '"',     # 94, RIGHT DOUBLE QUOTATION MARK
+        '•' => '*',     # 95, BULLET
+        '–' => '-',     # 96, EN DASH
+        '—' => '-',     # 97, EM DASH
+        '‹' => '<',     # 8B, SINGLE LEFT-POINTING ANGLE QUOTATION MARK
+        '›' => '>',     # 9B, SINGLE RIGHT-POINTING ANGLE QUOTATION MARK
+    };
 
-	$str =~ s/\xE2\x80\x98/`/g;		# 91
-	$str =~ s/\xE2\x80\x99/'/g;		# 92
-	$str =~ s/\xE2\x80\x9C/"/g;		# 93
-	$str =~ s/\xE2\x80\x9D/"/g;		# 94
-	$str =~ s/\xE2\x80\xA2/*/g;		# 95
-	$str =~ s/\xE2\x80\x93/-/g;		# 96
-	$str =~ s/\xE2\x80\x94/-/g;		# 97
+    if(exists($config->{'replace_unicode'}) && $config->{'replace_unicode'}) {
 
-	$str =~ s/\xE2\x80\xB9/</g;		# 8B
-	$str =~ s/\xE2\x80\xBA/>/g;		# 9B
+        foreach my $replace (keys(%{ $config->{replace_map} })) {
+            $str =~ s/$replace/$config->{replace_map}->{$replace}/g;
+        }
+    }
 
 	return $str;
 }
@@ -137,6 +175,10 @@ sub _demoronize
 =head1 AUTHOR
 
 Mike Eldridge <diz@cpan.org>
+
+=head1 CONTRIBUTORS
+
+Cory Watson <gphat@cpan.org>
 
 =cut
 
