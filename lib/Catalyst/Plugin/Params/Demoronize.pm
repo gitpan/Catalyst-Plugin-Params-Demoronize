@@ -106,7 +106,7 @@ This can be overridden, but defaults to:
 use NEXT;
 use Encode::ZapCP1252;
 
-our $VERSION = '1.12';
+our $VERSION = '1.13';
 
 =head1 METHODS
 
@@ -163,6 +163,7 @@ sub _demoronize
     if(exists($config->{'replace_unicode'}) && $config->{'replace_unicode'}) {
 
         foreach my $replace (keys(%{ $config->{replace_map} })) {
+            next unless defined($str);
             $str =~ s/$replace/$config->{replace_map}->{$replace}/g;
         }
     }
