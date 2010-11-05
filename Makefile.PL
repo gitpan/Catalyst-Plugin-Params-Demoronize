@@ -1,23 +1,56 @@
-#!/usr/bin/perl -w
 
-use warnings;
 use strict;
+use warnings;
 
-use inc::Module::Install;
 
-name			'Catalyst-Plugin-Params-Demoronize';
-author			'Mike Eldridge <diz@cpan.org>';
-license			'perl';
 
-requires		'NEXT'				=> 0;
-requires		'Encode::ZapCP1252'	=> 0;
+use ExtUtils::MakeMaker 6.31;
 
-build_requires	'Test::More'		=> '0.42';
-build_requires	'Test::Pod'			=> 0;
-build_requires	'Test::MockObject'	=> 0;
 
-version_from	'lib/Catalyst/Plugin/Params/Demoronize.pm';
 
-auto_install;
+my %WriteMakefileArgs = (
+  'ABSTRACT' => 'convert common UTF-8 and Windows-1252 characters to their ASCII equivalents',
+  'AUTHOR' => 'Mike Eldridge <diz@cpan.org>',
+  'BUILD_REQUIRES' => {
+    'Test::MockObject' => '0',
+    'Test::More' => '0.42',
+    'Test::Pod' => '0'
+  },
+  'CONFIGURE_REQUIRES' => {
+    'ExtUtils::MakeMaker' => '6.31'
+  },
+  'DISTNAME' => 'Catalyst-Plugin-Params-Demoronize',
+  'EXE_FILES' => [],
+  'LICENSE' => 'perl',
+  'NAME' => 'Catalyst::Plugin::Params::Demoronize',
+  'PREREQ_PM' => {
+    'Encode::ZapCP1252' => '0',
+    'MRO::Compat' => '0'
+  },
+  'VERSION' => '1.14',
+  'test' => {
+    'TESTS' => 't/*.t'
+  }
+);
 
-WriteAll;
+
+unless ( eval { ExtUtils::MakeMaker->VERSION(6.56) } ) {
+  my $br = delete $WriteMakefileArgs{BUILD_REQUIRES};
+  my $pp = $WriteMakefileArgs{PREREQ_PM};
+  for my $mod ( keys %$br ) {
+    if ( exists $pp->{$mod} ) {
+      $pp->{$mod} = $br->{$mod} if $br->{$mod} > $pp->{$mod};
+    }
+    else {
+      $pp->{$mod} = $br->{$mod};
+    }
+  }
+}
+
+delete $WriteMakefileArgs{CONFIGURE_REQUIRES}
+  unless eval { ExtUtils::MakeMaker->VERSION(6.52) };
+
+WriteMakefile(%WriteMakefileArgs);
+
+
+

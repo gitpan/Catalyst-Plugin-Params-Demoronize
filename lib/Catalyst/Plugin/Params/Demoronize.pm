@@ -1,4 +1,7 @@
 package Catalyst::Plugin::Params::Demoronize;
+BEGIN {
+  $Catalyst::Plugin::Params::Demoronize::VERSION = '1.14';
+}
 
 use strict;
 use warnings;
@@ -103,10 +106,8 @@ This can be overridden, but defaults to:
 
 =cut
 
-use NEXT;
+use MRO::Compat;
 use Encode::ZapCP1252;
-
-our $VERSION = '1.13';
 
 =head1 METHODS
 
@@ -122,7 +123,7 @@ sub prepare_parameters
 {
 	my $c = shift;
 
-	my $retval = $c->NEXT::prepare_parameters(@_);
+	my $retval = $c->maybe::next::method(@_);
 	my $params = $c->req->params;
 
 	foreach my $key (keys %$params) {
@@ -179,8 +180,15 @@ Mike Eldridge <diz@cpan.org>
 
 =head1 CONTRIBUTORS
 
-Cory Watson <gphat@cpan.org>
-Chisel Wright <chisel@cpan.org>
+=over 4
+
+=item * Cory Watson <gphat@cpan.org>
+
+=item * Chisel Wright <chisel@cpan.org>
+
+=item * Michele Beltrame <arthas@cpan.org>
+
+=back
 
 =cut
 

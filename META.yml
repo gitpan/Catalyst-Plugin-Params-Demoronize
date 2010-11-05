@@ -1,10 +1,21 @@
-name:               Catalyst-Plugin-Params-Demoronize
-version:            1.13
-abstract:           convert non-ISO extended ASCII characters into sane alternatives
-license:            perl
-version_from:       lib/Catalyst/Plugin/Params/Demoronize.pm
-installdirs:        site
-distribution_type:  module
-generated_by:       Mike Eldridge <diz@cpan.org>
+---
+abstract: 'convert common UTF-8 and Windows-1252 characters to their ASCII equivalents'
 author:
-  - Mike Eldridge <diz@cpan.org>
+  - 'Mike Eldridge <diz@cpan.org>'
+build_requires:
+  Test::MockObject: 0
+  Test::More: 0.42
+  Test::Pod: 0
+configure_requires:
+  ExtUtils::MakeMaker: 6.31
+dynamic_config: 0
+generated_by: 'Dist::Zilla version 4.102342, CPAN::Meta::Converter version 2.102400'
+license: perl
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+name: Catalyst-Plugin-Params-Demoronize
+requires:
+  Encode::ZapCP1252: 0
+  MRO::Compat: 0
+version: 1.14
